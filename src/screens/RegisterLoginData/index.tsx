@@ -36,7 +36,9 @@ export function RegisterLoginData() {
     formState: {
       errors
     }
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   async function handleRegister(formData: FormData) {
     const newLoginData = {
@@ -45,6 +47,19 @@ export function RegisterLoginData() {
     }
 
     // Save data on AsyncStorage
+    try {
+      const data = (await AsyncStorage.getItem("@passmanager:logins")) || "[]";
+      const parsedLogins = JSON.parse(data);
+
+      await AsyncStorage.setItem(
+        "@passmanager:logins",
+        JSON.stringify([...parsedLogins, newLoginData])
+      );
+      reset();
+      //Alert.alert("Sucesso, seu login foi cadastro com sucesso!");
+    } catch (error) {
+      
+    }
   }
 
   return (
@@ -60,9 +75,7 @@ export function RegisterLoginData() {
           <Input
             title="Título"
             name="title"
-            error={
-              // message error here
-            }
+            error={errors?.title?.message}
             control={control}
             placeholder="Escreva o título aqui"
             autoCapitalize="sentences"
@@ -71,9 +84,7 @@ export function RegisterLoginData() {
           <Input
             title="Email"
             name="email"
-            error={
-              // message error here
-            }
+            error={errors?.email?.message}
             control={control}
             placeholder="Escreva o Email aqui"
             autoCorrect={false}
@@ -83,9 +94,7 @@ export function RegisterLoginData() {
           <Input
             title="Senha"
             name="password"
-            error={
-              // message error here
-            }
+            error={errors?.password?.message}
             control={control}
             secureTextEntry
             placeholder="Escreva a senha aqui"
